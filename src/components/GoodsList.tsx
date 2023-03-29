@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useAppSelector } from '../app/hooks';
-import { actions as goodsActions } from '../features/goods';
+import React, { useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import * as goodsActions from '../features/goods';
+import { Loader } from './Loader';
 
 export const GoodsList = () => {
   const [newGood, setNewGood] = useState('');
-  // const [goods, setGoods] = useState<string[]>(['Apple', 'Banana', 'Coconut']);
-  const dispatch = useDispatch();
-  const goods = useAppSelector(state => state.goods);
+  const dispatch = useAppDispatch();
+  const {goods, loading, error} = useAppSelector(state => state.goods);
 
   const addGood = (goodToAdd: string) => dispatch(goodsActions.add(goodToAdd));
 
@@ -23,6 +22,18 @@ export const GoodsList = () => {
     addGood(newGood);
     setNewGood('');
   };
+
+  useEffect(() => {
+    dispatch(goodsActions.init());
+  }, []);
+
+  if (loading) {
+    return <Loader />;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
 
   return (
     <section className="goods">

@@ -1,24 +1,56 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, Dispatch, PayloadAction } from '@reduxjs/toolkit';
+import { fetchGoods } from '../services/api';
 
-const initialState: string[] = [];
+type GoodsState = {
+  goods: string[];
+  loading: boolean;
+  error: string;
+};
+
+const initialState: GoodsState = {
+  goods: [],
+  loading: false,
+  error: '',
+};
 
 const goodsSlice = createSlice({
   name: 'goods',
   initialState,
   reducers: {
-    add: (goods, action: PayloadAction<string>) => {
-      if (goods.some(good => good === action.payload)) {
-        return goods;
+    add: (state, action: PayloadAction<string>) => {
+      if (state.goods.some(good => good === action.payload)) {
+        return;
       } else {
-        goods.push(action.payload);
+        state.goods.push(action.payload);
       }
     },
-    take: (goods, action: PayloadAction<string>) => {
-      return goods.filter(good => good !== action.payload);
+    take: (state, action: PayloadAction<string>) => {
+      state.goods = state.goods.filter(good => good !== action.payload);
     },
-    clear: () => [],
+    clear: (state) => {
+      state.goods = [];
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(init.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(init.fulfilled, (state, action) => {
+      state.goods = action.payload;
+      state.loading = false;
+    });
+
+    builder.addCase(init.rejected, (state) => {
+      state.loading = false;
+      state.error = 'Error';
+    });
   }
 });
         
 export default goodsSlice.reducer;
-export const {actions} = goodsSlice;
+export const {add, take, clear} = goodsSlice.actions;
+
+export const init = createAsyncThunk('goods/fetch', () => {
+  return fetchGoods();
+});

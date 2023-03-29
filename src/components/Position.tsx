@@ -1,4 +1,3 @@
-import { Dispatch } from 'redux';
 import { useAppSelector, useAppDispatch } from '../app/hooks';
 import  * as positionActions from '../features/position';
 
